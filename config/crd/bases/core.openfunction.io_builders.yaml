@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
+    controller-gen.kubebuilder.io/version: v0.5.0
   creationTimestamp: null
   name: builders.core.openfunction.io
 spec:
@@ -23,14 +23,10 @@ spec:
       openAPIV3Schema:
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -59,16 +55,13 @@ spec:
                     description: Image registry account including username and password
                     properties:
                       key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
+                        description: The key of the secret to select from.  Must be a valid secret key.
                         type: string
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
                         type: string
                       optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
+                        description: Specify whether the Secret or its key must be defined
                         type: boolean
                     required:
                     - key
@@ -81,60 +74,53 @@ spec:
                 description: Git repository info of a function
                 properties:
                   deleteExisting:
+<<<<<<< HEAD
                     description: 'Clean out the contents of the repo''s destination
                       directory if it already exists before cloning the repo there
                       (default: true)'
                     type: boolean
+=======
+                    description: 'Clean out the contents of the repo''s destination directory if it already exists before cloning the repo there (default: true)'
+                    type: string
+>>>>>>> 57572cb (support for openfunctions on the edgenodes)
                   depth:
-                    description: 'Performs a shallow clone where only the most recent
-                      commit(s) will be fetched (default: 1)'
+                    description: 'Performs a shallow clone where only the most recent commit(s) will be fetched (default: 1)'
                     type: integer
                   gitInitImage:
-                    description: 'The image used where the git-init binary is (default:
-                      "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.17.3")'
+                    description: 'The image used where the git-init binary is (default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.17.3")'
                     type: string
                   httpProxy:
-                    description: 'Git HTTP proxy server for non-SSL requests (default:
-                      "")'
+                    description: 'Git HTTP proxy server for non-SSL requests (default: "")'
                     type: string
                   httpsProxy:
-                    description: 'Git HTTPS proxy server for SSL requests (default:
-                      "")'
+                    description: 'Git HTTPS proxy server for SSL requests (default: "")'
                     type: string
                   noProxy:
-                    description: 'Git no proxy - opt out of proxying HTTP/HTTPS requests
-                      (default: "")'
+                    description: 'Git no proxy - opt out of proxying HTTP/HTTPS requests (default: "")'
                     type: string
                   refspec:
-                    description: Git refspec to fetch before checking out revision
-                      (default:"")
+                    description: Git refspec to fetch before checking out revision (default:"")
                     type: string
                   revision:
-                    description: Git revision to checkout (branch, tag, sha, ref…)
-                      (default:"")
+                    description: Git revision to checkout (branch, tag, sha, ref…) (default:"")
                     type: string
                   sourceSubPath:
-                    description: A subpath within the `source` input where the source
-                      to build is located.
+                    description: A subpath within the `source` input where the source to build is located.
                     type: string
                   sslVerify:
-                    description: 'Defines if http.sslVerify should be set to true
-                      or false in the global git config (default: true)'
+                    description: 'Defines if http.sslVerify should be set to true or false in the global git config (default: true)'
                     type: boolean
                   subDirectory:
-                    description: 'Subdirectory inside the "output" workspace to clone
-                      the git repo into (default: "")'
+                    description: 'Subdirectory inside the "output" workspace to clone the git repo into (default: "")'
                     type: string
                   submodules:
-                    description: 'Defines if the resource should initialize and fetch
-                      the submodules (default: true)'
+                    description: 'Defines if the resource should initialize and fetch the submodules (default: true)'
                     type: boolean
                   url:
                     description: Git url to clone
                     type: string
                   verbose:
-                    description: 'Log the commands that are executed during git-clone''s
-                      operation (default: true)'
+                    description: 'Log the commands that are executed during git-clone''s operation (default: true)'
                     type: boolean
                 required:
                 - url

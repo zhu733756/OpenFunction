@@ -1,0 +1,9 @@
+apiVersion: rules.kubeedge.io/v1
+kind: RuleEndpoint
+metadata:
+  name: openfunction-helloworld-servicebus
+  labels:
+    description: openfunction-helloworld-servicebus
+spec:
+  ruleEndpointType: "servicebus"
+  properties: {"service_port":"31355"}

@@ -121,6 +121,26 @@ func (r *ServingReconciler) mutateKsvc(ksvc *kservingv1.Service, s *openfunction
 			objectMeta.Name = fmt.Sprintf("%s-%s", ksvc.Name, strings.ReplaceAll(*s.Spec.Version, ".", ""))
 		}
 
+		tolerations := make([]corev1.Toleration, 0)
+		nodeSelector := map[string]string{}
+		var affinity *corev1.Affinity
+
+		if len(s.Spec.Tolerations) > 0 {
+			for _, t := range s.Spec.Tolerations {
+				tolerations = append(tolerations, t)
+			}
+		}
+
+		if len(s.Spec.NodeSelector) > 0 {
+			for k, v := range s.Spec.NodeSelector {
+				nodeSelector[k] = v
+			}
+		}
+
+		if s.Spec.Affinity != nil {
+			affinity = s.Spec.Affinity
+		}
+
 		expected := kservingv1.Service{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "serving.knative.dev/v1",
@@ -135,7 +155,18 @@ func (r *ServingReconciler) mutateKsvc(ksvc *kservingv1.Service, s *openfunction
 					Template: kservingv1.RevisionTemplateSpec{
 						ObjectMeta: objectMeta,
 						Spec: kservingv1.RevisionSpec{
+<<<<<<< HEAD
 							PodSpec: *template,
+=======
+							PodSpec: corev1.PodSpec{
+								Containers: []corev1.Container{
+									container,
+								},
+								Tolerations:  tolerations,
+								Affinity:     affinity,
+								NodeSelector: nodeSelector,
+							},
+>>>>>>> 57572cb (support for openfunctions on the edgenodes)
 						},
 					},
 				},

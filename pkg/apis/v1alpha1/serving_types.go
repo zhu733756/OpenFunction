@@ -20,7 +20,11 @@ import (
 	componentsv1alpha1 "github.com/dapr/dapr/pkg/apis/components/v1alpha1"
 	subscriptionsv1alpha1 "github.com/dapr/dapr/pkg/apis/subscriptions/v1alpha1"
 	kedav1alpha1 "github.com/kedacore/keda/v2/api/v1alpha1"
+<<<<<<< HEAD
 	v1 "k8s.io/api/core/v1"
+=======
+	corev1 "k8s.io/api/core/v1"
+>>>>>>> 57572cb (support for openfunctions on the edgenodes)
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -136,11 +140,25 @@ type ServingSpec struct {
 	// Parameters of OpenFuncAsync runtime.
 	// +optional
 	OpenFuncAsync *OpenFuncAsyncRuntime `json:"openFuncAsync,omitempty"`
+<<<<<<< HEAD
 	// Template describes the pods that will be created.
 	// The container named `function` is the container which is used to run the image built by the builder.
 	// If it is not set, the controller will automatically add one.
 	// +optional
 	Template *v1.PodSpec `json:"template,omitempty"`
+=======
+	// If specified, the pod's tolerations would make effect.
+	// +optional
+	Tolerations []corev1.Toleration `json:"tolerations,omitempty" protobuf:"bytes,22,opt,name=tolerations"`
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty" protobuf:"bytes,7,rep,name=nodeSelector"`
+	// If specified, the pod's scheduling constraints
+	// +optional
+	Affinity *corev1.Affinity `json:"affinity,omitempty" protobuf:"bytes,18,opt,name=affinity"`
+>>>>>>> 57572cb (support for openfunctions on the edgenodes)
 }
 
 // ServingStatus defines the observed state of Serving

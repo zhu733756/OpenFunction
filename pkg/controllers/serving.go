@@ -190,12 +190,55 @@ func (r *ServingReconciler) mutateWorkload(obj runtime.Object, s *openfunction.S
 			spec.Containers = append(spec.Containers, *container)
 		}
 
+		tolerations := make([]corev1.Toleration, 0)
+		nodeSelector := map[string]string{}
+		var affinity *corev1.Affinity
+
+		if len(s.Spec.Tolerations) > 0 {
+			for _, t := range s.Spec.Tolerations {
+				tolerations = append(tolerations, t)
+			}
+		}
+
+		if len(s.Spec.NodeSelector) > 0 {
+			for k, v := range s.Spec.NodeSelector {
+				nodeSelector[k] = v
+			}
+		}
+
+		if s.Spec.Affinity != nil {
+			affinity = s.Spec.Affinity
+		}
+
 		template := corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Annotations: annotations,
 				Labels:      labels,
 			},
+<<<<<<< HEAD
 			Spec: *spec,
+=======
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{
+					{
+						Name:  UserContainer,
+						Image: s.Spec.Image,
+						Ports: []corev1.ContainerPort{
+							{
+								Name:          UserPort,
+								ContainerPort: port,
+								Protocol:      corev1.ProtocolTCP,
+							},
+						},
+						ImagePullPolicy: corev1.PullAlways,
+						Env:             env,
+					},
+				},
+				NodeSelector: nodeSelector,
+				Affinity:     affinity,
+				Tolerations:  tolerations,
+			},
+>>>>>>> 57572cb (support for openfunctions on the edgenodes)
 		}
 
 		switch obj.(type) {

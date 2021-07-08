@@ -225,6 +225,16 @@ func (r *FunctionReconciler) createServingSpec(fn *openfunction.Function) openfu
 		Image:   fn.Spec.Image,
 	}
 
+	if len(fn.Spec.NodeSelector) > 0 {
+		spec.NodeSelector = fn.Spec.NodeSelector
+	}
+	if fn.Spec.Affinity != nil {
+		spec.Affinity = fn.Spec.Affinity
+	}
+	if len(fn.Spec.Tolerations) > 0 {
+		spec.Tolerations = fn.Spec.Tolerations
+	}
+
 	if fn.Spec.Port != nil {
 		port := *fn.Spec.Port
 		spec.Port = &port

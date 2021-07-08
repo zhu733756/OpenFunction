@@ -1,0 +1,11 @@
+apiVersion: rules.kubeedge.io/v1
+kind: Rule
+metadata:
+  name: openfunction-helloworld-rules
+  labels:
+    description: openfunction-restToServicebus
+spec:
+  source: "openfunction-helloworld-rest"
+  sourceResource: {"path":"/"}
+  target: "openfunction-helloworld-servicebus"
+  targetResource: {"path":"/"}
