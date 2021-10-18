@@ -1,0 +1,168 @@
+name: Main CI WorkFlow
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'release-*'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'master'
+      - 'release-*'
+env:
+  OF_IMAGE: openfunction/openfunction:latest
+  REGISTRY_SERVER: https://index.docker.io/v1/
+  REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: Basic test and verify
+    env:
+      GO111MODULE: "on"
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Install kubebuilder-3.1.0
+        run: |
+          curl -L -o kubebuilder "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v3.1.0/kubebuilder_linux_amd64"
+          chmod +x kubebuilder && mv kubebuilder /usr/local/bin/
+      - name: Run basic test
+        run: make test
+
+      - name: Run verify crds test
+        run:  make verify
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: Binary build
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - run: make binary
+        name: Run build all binaries
+       
+  docker_build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: Docker image build
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: build image
+        run: |
+          docker build -t ${env.OF_IMAGE} . -f Dockerfile
+
+  synchronization_openfunction_deployment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    name: Install and uninstall openfunction deployment
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16.x
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.2.0
+        with:
+          config: .github/workflows/kind/kind.yaml
+
+      - name: Install related dependencies
+        run: |
+          chmod a+x ./hack/deploy.sh && ./hack/deploy.sh --with-knative
+
+      - name: Install openfunction CRDs and controllers
+        run: |
+          make install && make deploy 
+
+      - name: Create push-secret
+        run: |
+          kubectl create secret docker-registry push-secret \
+              --docker-server=${{ env.REGISTRY_SERVER }} \
+              --docker-username=${{ env.REGISTRY_USER }} \
+              --docker-password=${{ env.REGISTRY_PASSWORD }} 
+
+      - name: Deploy function-sample
+        run: |
+           cat config/samples/function-sample.yaml | sed -e 's/openfunctiondev/${{env.DOCKER_USERNAME}}/g' | kubectl apply -f -
+
+      - name: Waiting 60 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '60s'
+
+      - name: Verify server
+        run: |
+          server_url=`kubectl get ksvc function-sample-serving-ksvc -o jsonpath={.status.url}`
+          echo "Function now is serving on ${server_url}"
+          CODE=`curl --write-out '%{http_code}' \
+            --silent \
+            --output /dev/null \
+            --request GET \
+            --url '${server_url}'`
+          if [ $CODE!="200" ] 
+          then
+              echo "FAILURE"
+              exit -1
+          else
+              echo "SUCCESS"
+          fi
+
+      - name: uninstall openfunction CRDs and controllers
+        run: |
+          make undeploy && make uninstall  
